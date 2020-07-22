@@ -30,6 +30,11 @@ import sys
 #It is possible for execution to timeout or for the notebook to fail when retrieving Shapely data.
 #I am unable to reliably reproduce the error but clearing the OSMNX cache files, and retrying the query has seemed to work in most cases.
 
+
+#Clean the argument list of any trailing spaces and beautify the arguments.
+#Attempts to call subprocess.run() passing a command line string activating osmnx environment (ox) and then papermill.
+#It points to the location of the osmnxgetcoords.ipynb file (user MUST change this to use their location)
+# and contains arguments supplied by user (city,state,country).
 def cleanAndRun(args):
 
     city = args[0].title().strip()
@@ -43,13 +48,18 @@ def cleanAndRun(args):
     except:
         print("An error has occured. Try again or re-run the script.")
 
+#This method is run when command line arguments are specified. If more or less than 4 arguments are given it will throw an error.
+#It calls cleanAndRun() passing sys.argv arguments excluding script name.
 def runWithCommandLineArguments():
     if len(sys.argv) < 4 or len(sys.argv) > 4:
         print("Invalid number of command line inputs. Accepted format: py ascgs.py city state country. If your arguments contain spaces please use py ascgs.py \"San Marcos\" \"California\" \"USA\"")
     else:
         arguments = sys.argv[1:]
         cleanAndRun(arguments)
-        
+
+#If no arguments are given on the command line this method is run.
+#It will gather user input until it adheres to specified format.
+#It calls cleanAndRun() passing locationList      
 def runWithoutCommandLineArguments():
     while True:
         location = input("Enter a city name to query in for format of: City, State, Country e.g. Carlsbad, California, USA:   ")
