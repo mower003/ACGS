@@ -1,13 +1,14 @@
 #! python3
 
 import subprocess
+import sys
 
 #Automated Street Coordinate Gathering Script
 #=================================================================IMPORTANT!!=====================================================================
 #Users MUST install miniconda, osmnx, and papermill + their dependencies for the program to work.
 #A description and links of the installation are provided on GitHub.
 #You must also have the accompanying file 'osmnxgetcoords.ipynb' and reference it appropriately in the cmdString below.
-#using jupyter-client 6.1.3 (most recent), and most recent install of papermil. However, because of something with asnycio within the 
+#using jupyter-client 6.1.9 (most recent), and most recent install of papermill. However, because of something with asnycio within the 
 # /tornado/platform (part of jupyter notebook)
 #the python file asyncio.py located in 'miniconda3\envs\ox\Lib\site-packages\tornado\platform' had to be altered with the insertion of the following line:
 #if sys.platform == 'win32':
@@ -29,14 +30,40 @@ import subprocess
 #It is possible for execution to timeout or for the notebook to fail when retrieving Shapely data.
 #I am unable to reliably reproduce the error but clearing the OSMNX cache files, and retrying the query has seemed to work in most cases.
 
+def cleanAndRun(args):
 
-location = input("Enter a city name to query in for format of: City, State, Country e.g. Carlsbad, California, USA:   ")
-locationList = location.split(",")
-city = locationList[0].title().strip()
-state = locationList[1].title().strip()
-country = locationList[2].upper().strip()
+    city = args[0].title().strip()
+    state = args[1].title().strip()
+    country = args[2].upper().strip()
 
-cmdString = 'conda activate ox && papermill C://Users/User/osmnxgetcoords.ipynb C://Users/User/osmnxgetcoordsout.ipynb -p city ' + city + ' -p state ' + state + ' -p country ' + country + ' && conda deactivate'
+    cmdString = 'conda activate ox && papermill C://Users/User/osmnxgetcoords.ipynb C://Users/User/osmnxgetcoordsout.ipynb -p city ' + city + ' -p state ' + state + ' -p country ' + country + ' && conda deactivate'
+    try:
+        print("Running Program using" + city + " " + state + " " + country)
+        subprocess.run(cmdString, shell=True)
+    except:
+        print("An error has occured. Try again or re-run the script.")
 
-subprocess.run(cmdString, shell=True)
+def runWithCommandLineArguments():
+    if len(sys.argv) < 4 or len(sys.argv) > 4:
+        print("Invalid number of command line inputs. Accepted format: py ascgs.py city state country. If your arguments contain spaces please use py ascgs.py \"San Marcos\" \"California\" \"USA\"")
+    else:
+        arguments = sys.argv[1:]
+        cleanAndRun(arguments)
+        
+def runWithoutCommandLineArguments():
+    while True:
+        location = input("Enter a city name to query in for format of: City, State, Country e.g. Carlsbad, California, USA:   ")
+        locationList = location.split(",")
+        if len(locationList) == 3:
+            break
+        else:
+            print("Invalid input declaration! Enter a city name to query in for format of: City, State, Country.")
+
+    cleanAndRun(locationList)
+
+if len(sys.argv) > 1:
+    runWithCommandLineArguments()
+else:
+    runWithoutCommandLineArguments()
+
 
